@@ -59,17 +59,20 @@ func formatTimeHeader(when time.Time) ([]byte, int, int) {
 	y, mo, d := when.Date()
 	h, mi, s := when.Clock()
 	ns := when.Nanosecond() / 1000000
-	//len("2006/01/02 15:04:05.123 ")==24
-	var buf [24]byte
+	_, offset := when.Zone()
+	ohour := offset / 3600
+	omin := offset - ohour*3600
+	//len("2006-01-02 15:04:05.123+08:00")==30
+	var buf [30]byte
 
 	buf[0] = y1[y/1000%10]
 	buf[1] = y2[y/100]
 	buf[2] = y3[y-y/100*100]
 	buf[3] = y4[y-y/100*100]
-	buf[4] = '/'
+	buf[4] = '-'
 	buf[5] = mo1[mo-1]
 	buf[6] = mo2[mo-1]
-	buf[7] = '/'
+	buf[7] = '-'
 	buf[8] = d1[d-1]
 	buf[9] = d2[d-1]
 	buf[10] = ' '
@@ -85,8 +88,14 @@ func formatTimeHeader(when time.Time) ([]byte, int, int) {
 	buf[20] = ns1[ns/100]
 	buf[21] = ns1[ns%100/10]
 	buf[22] = ns1[ns%10]
+	buf[23] = '+'
+	buf[24] = h1[ohour]
+	buf[25] = h2[ohour]
+	buf[26] = ':'
+	buf[27] = mi1[omin/60]
+	buf[28] = mi2[omin%60]
 
-	buf[23] = ' '
+	buf[29] = ' '
 
 	return buf[0:], d, h
 }
